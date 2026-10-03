@@ -36,11 +36,11 @@ export default async function SessionAttendancePage({
 
   return (
     <PageShell user={user}>
-      <Link href="/admin/sessions" className="text-sm text-blue-600 hover:underline">
+      <Link href="/admin/sessions" className="text-sm text-brand-600 hover:underline">
         ← All sessions
       </Link>
       <div>
-        <h1 className="text-2xl font-semibold">{session.title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{session.title}</h1>
         <p className="text-sm text-slate-600">
           {session.type === "CAMP" ? "Camp" : "Session"} ·{" "}
           {session.level === null ? "All levels" : `Level ${session.level}`} ·{" "}

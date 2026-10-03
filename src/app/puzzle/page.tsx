@@ -26,7 +26,7 @@ export default async function PuzzlePage() {
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Daily puzzle</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Daily puzzle</h1>
       {!puzzle ? (
         <div className={cardClass}>
           <p className="text-sm text-slate-500">No puzzle for today yet. Check back later.</p>

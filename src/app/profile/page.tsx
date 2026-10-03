@@ -5,7 +5,10 @@ import { XP_LABELS } from "@/lib/xp-labels";
 import CfLinkCard from "@/components/CfLinkCard";
 import UnlinkButton from "@/components/UnlinkButton";
 import PageShell from "@/components/PageShell";
-import { cardClass } from "@/components/ui";
+import Avatar from "@/components/Avatar";
+import { badgeClass, cardClass, mutedClass, pageTitleClass } from "@/components/ui";
+
+export const metadata = { title: "Profile" };
 
 // Kept outside the component: the purity lint rule forbids Date.now() during render.
 function isInFuture(d: Date | null | undefined): boolean {
@@ -34,25 +37,30 @@ export default async function ProfilePage() {
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Profile</h1>
+      <h1 className={pageTitleClass}>Profile</h1>
 
-      <div className={`${cardClass} space-y-1`}>
-        <p className="text-lg font-medium">{user.name}</p>
-        <p className="text-sm text-slate-600">{user.email}</p>
-        <p className="text-sm text-slate-600">
-          Role: {user.role}
-          {user.level !== null ? ` · Level ${user.level}` : ""} · Total XP: <b>{user.totalXp}</b>
-        </p>
+      <div className={`${cardClass} flex flex-wrap items-center gap-4`}>
+        <Avatar src={user.cfAvatar} name={user.name} size="lg" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-lg font-semibold">{user.name}</p>
+          <p className={`truncate ${mutedClass}`}>{user.email}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <span className={badgeClass.brand}>{user.role}</span>
+            {user.level !== null && <span className={badgeClass.slate}>Level {user.level}</span>}
+          </div>
+        </div>
+        <div className="rounded-xl bg-brand-50 px-5 py-3 text-center">
+          <p className="text-2xl font-bold text-brand-700">{user.totalXp}</p>
+          <p className="text-xs font-medium text-brand-600">Total XP</p>
+        </div>
       </div>
 
       {user.isVerified ? (
         <div className={`${cardClass} flex items-center gap-4`}>
-          {user.cfAvatar && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.cfAvatar} alt="" className="h-16 w-16 rounded-full object-cover" />
-          )}
           <div className="text-sm">
-            <p className="font-medium">{user.cfHandle} ✓ Verified</p>
+            <p className="font-medium">
+              {user.cfHandle} <span className={badgeClass.green}>✓ Verified</span>
+            </p>
             <p className="text-slate-600">
               {user.cfRank ?? "unrated"}
               {user.cfRating ? ` · ${user.cfRating}` : ""}
@@ -69,7 +77,7 @@ export default async function ProfilePage() {
       <div className={cardClass}>
         <h2 className="mb-3 text-lg font-semibold">XP history</h2>
         {history.length === 0 ? (
-          <p className="text-sm text-slate-500">No XP yet.</p>
+          <p className={mutedClass}>No XP yet.</p>
         ) : (
           <ul className="divide-y divide-slate-100 text-sm">
             {history.map((h) => (

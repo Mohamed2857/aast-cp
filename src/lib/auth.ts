@@ -68,10 +68,17 @@ export async function getCurrentUser() {
   try {
     const { payload } = await jwtVerify(token, getKey());
     if (!payload.sub) return null;
-    return await prisma.user.findUnique({
+    const row = await prisma.user.findUnique({
       where: { id: payload.sub },
-      select: publicUserSelect,
+      select: { ...publicUserSelect, passwordChangedAt: true },
     });
+    if (!row) return null;
+    // A password change (reset link or admin reset) logs out every older session.
+    const { passwordChangedAt, ...user } = row;
+    if (passwordChangedAt && (payload.iat ?? 0) < Math.floor(passwordChangedAt.getTime() / 1000)) {
+      return null;
+    }
+    return user;
   } catch {
     return null;
   }

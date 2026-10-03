@@ -2,7 +2,10 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requirePageUser } from "@/lib/guards";
 import PageShell from "@/components/PageShell";
-import { cardClass } from "@/components/ui";
+import LevelTabs from "@/components/LevelTabs";
+import { badgeClass, cardClass, mutedClass, pageTitleClass } from "@/components/ui";
+
+export const metadata = { title: "Learning Hub" };
 
 export default async function LearnPage({
   searchParams,
@@ -30,24 +33,12 @@ export default async function LearnPage({
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Learning Hub</h1>
-      <div className="flex gap-2">
-        {[0, 1, 2].map((l) => (
-          <Link
-            key={l}
-            href={`/learn?level=${l}`}
-            className={`rounded-full px-3 py-1 text-sm ${
-              l === levelNum ? "bg-blue-600 text-white" : "bg-white text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            Level {l}
-          </Link>
-        ))}
-      </div>
+      <h1 className={pageTitleClass}>Learning Hub</h1>
+      <LevelTabs base="/learn" current={levelNum} />
 
       {byWeek.size === 0 ? (
         <div className={cardClass}>
-          <p className="text-sm text-slate-500">No materials for this level yet.</p>
+          <p className={mutedClass}>No materials for this level yet.</p>
         </div>
       ) : (
         [...byWeek.entries()].map(([week, items]) => (
@@ -58,13 +49,11 @@ export default async function LearnPage({
                 <li key={m.id}>
                   <Link
                     href={`/learn/${m.id}`}
-                    className="flex items-center justify-between py-3 hover:bg-slate-50"
+                    className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition hover:bg-slate-50"
                   >
                     <span className="font-medium">{m.title}</span>
                     {doneIds.has(m.id) && (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                        Completed
-                      </span>
+                      <span className={badgeClass.green}>Completed</span>
                     )}
                   </Link>
                 </li>

@@ -16,7 +16,7 @@ export default async function AdminXpPage() {
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Adjust XP</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Adjust XP</h1>
       <p className="text-sm text-slate-600">
         Add XP (positive number) or take it away (negative number). Every change needs a reason and
         shows up in the trainee&apos;s XP history.

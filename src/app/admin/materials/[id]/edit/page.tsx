@@ -16,7 +16,7 @@ export default async function EditMaterialPage({ params }: { params: Promise<{ i
   const opts = parseOptions(m.checkOptions);
   return (
     <PageShell user={user}>
-      <Link href="/admin/materials" className="text-sm text-blue-600 hover:underline">
+      <Link href="/admin/materials" className="text-sm text-brand-600 hover:underline">
         ← All materials
       </Link>
       <NewMaterialForm

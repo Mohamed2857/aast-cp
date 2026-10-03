@@ -49,6 +49,11 @@ export default function LoginForm() {
         {errors.password && (
           <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
         )}
+        <div className="mt-1 text-right">
+          <Link href="/forgot-password" className="text-xs text-brand-600 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
       </div>
 
       {serverError && <p className="text-sm text-red-600">{serverError}</p>}
@@ -58,7 +63,7 @@ export default function LoginForm() {
       </button>
       <p className="text-center text-sm text-slate-600">
         New here?{" "}
-        <Link href="/register" className="text-blue-600 hover:underline">
+        <Link href="/register" className="text-brand-600 hover:underline">
           Create an account
         </Link>
       </p>

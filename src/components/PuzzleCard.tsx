@@ -83,7 +83,7 @@ export default function PuzzleCard({
                 isCorrect
                   ? "border-green-500 bg-green-50"
                   : choice === i
-                    ? "border-blue-500 bg-blue-50"
+                    ? "border-blue-500 bg-brand-50"
                     : "border-slate-200"
               } ${solved || !canAnswer ? "" : "cursor-pointer"}`}
             >

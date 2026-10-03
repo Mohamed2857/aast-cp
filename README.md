@@ -11,6 +11,7 @@ Built with Next.js (App Router), Prisma, PostgreSQL (Neon) and Tailwind.
 | Area | What it does |
 | --- | --- |
 | Accounts | Email + password, signed cookie session, Codeforces handle verification by a code |
+| Forgot password | Email with a one-hour, single-use link (Gmail app password or Resend). Only the SHA-256 of the token is stored |
 | Roles | Trainee, Instructor, Admin |
 | Attendance | Sessions and camps, attendance and "active" bonus, XP given and taken back |
 | Learning Hub | Materials per level and week, check-in question (once per material) |
@@ -51,7 +52,8 @@ contests pages.
 - Passwords are hashed with bcrypt; the hash never leaves the server.
 - Correct answers (check-in and puzzle) are checked on the server and never sent to the browser.
 - After 8 failed logins for one email (or 30 from one IP) in 15 minutes, login is blocked for the rest of that window.
-- Login cookies last 30 days and are not revoked by a password reset.
+- Reset emails: max 3 per email and 10 per IP per hour; the answer is the same whether or not the account exists.
+- Login cookies last 30 days. Changing a password (reset link or admin reset) logs out every older session.
 
 ## Scripts
 

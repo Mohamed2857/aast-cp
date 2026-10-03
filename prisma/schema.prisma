@@ -56,6 +56,7 @@ model User {
   name             String
   email            String   @unique
   passwordHash     String? // bcrypt hash, never sent to the client
+  passwordChangedAt DateTime? // login cookies issued before this moment stop working
   role             Role     @default(TRAINEE)
   level            Int? // 0, 1, 2
   cfHandle         String?  @unique
@@ -76,6 +77,7 @@ model User {
   attendances       Attendance[]
   puzzleSolves      PuzzleSolve[]
   materialCompletes MaterialCompletion[]
+  passwordResets    PasswordResetToken[]
 
   @@index([totalXp])
 }
@@ -237,4 +239,17 @@ model LoginAttempt {
   createdAt DateTime @default(now())
 
   @@index([key, createdAt])
+}
+
+/// One row per "forgot password" email. Only the SHA-256 of the token is stored, never the token.
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

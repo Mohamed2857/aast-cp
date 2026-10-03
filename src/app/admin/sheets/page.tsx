@@ -14,7 +14,7 @@ export default async function AdminSheetsPage() {
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Private sheets</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Private sheets</h1>
       <NewSheetForm />
 
       <div className={cardClass}>

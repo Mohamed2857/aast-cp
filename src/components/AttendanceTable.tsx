@@ -74,7 +74,7 @@ export default function AttendanceTable({
           Present: <b>{presentCount}</b> / {rows.length}
         </span>
         <span className="space-x-3">
-          <button onClick={() => setAllPresent(true)} className="text-blue-600 hover:underline">
+          <button onClick={() => setAllPresent(true)} className="text-brand-600 hover:underline">
             Select all
           </button>
           <button onClick={() => setAllPresent(false)} className="text-slate-600 hover:underline">

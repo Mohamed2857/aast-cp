@@ -4,7 +4,9 @@ import { formatCairo } from "@/lib/format";
 import { parseProblems } from "@/lib/sheets";
 import { XP_VALUES } from "@/config/xp.config";
 import PageShell from "@/components/PageShell";
-import { cardClass } from "@/components/ui";
+import { badgeClass, cardClass, mutedClass, pageTitleClass } from "@/components/ui";
+
+export const metadata = { title: "Contests" };
 
 export default async function ContestsPage() {
   const user = await requirePageUser();
@@ -27,7 +29,7 @@ export default async function ContestsPage() {
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Contests</h1>
+      <h1 className={pageTitleClass}>Contests</h1>
 
       <div className={`${cardClass} text-sm text-slate-700`}>
         <p className="mb-2 font-medium">How contests give XP</p>
@@ -47,7 +49,7 @@ export default async function ContestsPage() {
 
       {contests.length === 0 ? (
         <div className={cardClass}>
-          <p className="text-sm text-slate-500">No contests yet.</p>
+          <p className={mutedClass}>No contests yet.</p>
         </div>
       ) : (
         <div className={cardClass}>
@@ -66,15 +68,13 @@ export default async function ContestsPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     {xp !== undefined && xp !== 0 && (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                        +{xp} XP
-                      </span>
+                      <span className={badgeClass.green}>+{xp} XP</span>
                     )}
                     <a
                       href={c.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:underline"
+                      className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
                     >
                       Open
                     </a>

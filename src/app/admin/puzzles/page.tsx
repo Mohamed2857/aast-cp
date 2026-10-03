@@ -19,7 +19,7 @@ export default async function AdminPuzzlesPage() {
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Daily puzzles</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Daily puzzles</h1>
       <NewPuzzleForm today={today} />
 
       <div className={cardClass}>

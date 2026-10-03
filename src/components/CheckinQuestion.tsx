@@ -67,7 +67,7 @@ export default function CheckinQuestion({
               <label
                 key={i}
                 className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
-                  choice === i ? "border-blue-500 bg-blue-50" : "border-slate-200"
+                  choice === i ? "border-blue-500 bg-brand-50" : "border-slate-200"
                 }`}
               >
                 <input

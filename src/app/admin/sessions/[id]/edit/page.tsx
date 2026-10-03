@@ -15,7 +15,7 @@ export default async function EditSessionPage({ params }: { params: Promise<{ id
 
   return (
     <PageShell user={user}>
-      <Link href="/admin/sessions" className="text-sm text-blue-600 hover:underline">
+      <Link href="/admin/sessions" className="text-sm text-brand-600 hover:underline">
         ← All sessions
       </Link>
       <NewSessionForm

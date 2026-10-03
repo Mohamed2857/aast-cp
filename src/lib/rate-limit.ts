@@ -41,3 +41,28 @@ export async function purgeOldAttempts() {
   });
   return r.count;
 }
+
+// ---- "Forgot password" emails: stops someone from spamming an inbox ----
+const RESET_WINDOW_MS = 60 * 60 * 1000;
+const MAX_RESETS_PER_EMAIL = 3;
+const MAX_RESETS_PER_IP = 10;
+
+const resetEmailKey = (email: string) => `reset-email:${email}`;
+const resetIpKey = (ip: string) => `reset-ip:${ip}`;
+
+/** True when this email or IP asked for too many reset emails in the last hour. */
+export async function isResetLimited(email: string, ip: string | null): Promise<boolean> {
+  const since = new Date(Date.now() - RESET_WINDOW_MS);
+  const [byEmail, byIp] = await Promise.all([
+    prisma.loginAttempt.count({ where: { key: resetEmailKey(email), createdAt: { gte: since } } }),
+    ip
+      ? prisma.loginAttempt.count({ where: { key: resetIpKey(ip), createdAt: { gte: since } } })
+      : Promise.resolve(0),
+  ]);
+  return byEmail >= MAX_RESETS_PER_EMAIL || byIp >= MAX_RESETS_PER_IP;
+}
+
+export async function recordResetRequest(email: string, ip: string | null) {
+  const data = [{ key: resetEmailKey(email) }, ...(ip ? [{ key: resetIpKey(ip) }] : [])];
+  await prisma.loginAttempt.createMany({ data });
+}

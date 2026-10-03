@@ -14,7 +14,7 @@ export default async function AdminContestsPage() {
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Contests</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Contests</h1>
       <NewContestForm />
 
       <div className={cardClass}>

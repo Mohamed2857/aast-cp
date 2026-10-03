@@ -30,7 +30,10 @@ export async function POST(
   if (!target) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const password = tempPassword();
-  await prisma.user.update({ where: { id }, data: { passwordHash: await hashPassword(password) } });
+  await prisma.user.update({
+    where: { id },
+    data: { passwordHash: await hashPassword(password), passwordChangedAt: new Date() },
+  });
   await clearFailures(target.email);
 
   return NextResponse.json({ password });

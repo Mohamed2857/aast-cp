@@ -27,7 +27,7 @@ export default function SyncSheetButton({ sheetId }: { sheetId: string }) {
       <button
         onClick={sync}
         disabled={busy}
-        className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        className="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-50"
       >
         {busy ? "Syncing..." : "Sync now"}
       </button>

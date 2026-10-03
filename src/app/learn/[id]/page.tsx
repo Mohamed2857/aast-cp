@@ -35,15 +35,15 @@ export default async function MaterialPage({ params }: { params: Promise<{ id: s
   });
 
   const linkClass =
-    "rounded-lg border border-slate-300 px-3 py-2 text-sm text-blue-600 hover:bg-slate-50";
+    "rounded-lg border border-slate-300 px-3 py-2 text-sm text-brand-600 hover:bg-slate-50";
 
   return (
     <PageShell user={user}>
-      <Link href={`/learn?level=${m.level}`} className="text-sm text-blue-600 hover:underline">
+      <Link href={`/learn?level=${m.level}`} className="text-sm text-brand-600 hover:underline">
         ← Level {m.level}
       </Link>
       <div>
-        <h1 className="text-2xl font-semibold">{m.title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{m.title}</h1>
         <p className="text-sm text-slate-600">
           Level {m.level} · Week {m.week}
         </p>

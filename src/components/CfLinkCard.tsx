@@ -81,7 +81,7 @@ export default function CfLinkCard({ pending }: { pending: PendingVerification |
                 href="https://codeforces.com/settings/social"
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-brand-600 hover:underline"
               >
                 Codeforces settings
               </a>{" "}

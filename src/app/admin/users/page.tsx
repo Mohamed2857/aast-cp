@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { requirePageUser, ADMIN_ONLY } from "@/lib/guards";
 import PageShell from "@/components/PageShell";
-import UserRow from "@/components/UserRow";
-import { cardClass } from "@/components/ui";
+import UserList from "@/components/UserList";
+import { mutedClass, pageTitleClass } from "@/components/ui";
+
+export const metadata = { title: "Users" };
 
 export default async function UsersPage() {
   const admin = await requirePageUser(ADMIN_ONLY);
@@ -16,30 +18,18 @@ export default async function UsersPage() {
       role: true,
       level: true,
       cfHandle: true,
+      cfAvatar: true,
       totalXp: true,
     },
   });
 
   return (
     <PageShell user={admin}>
-      <h1 className="text-2xl font-semibold">Users</h1>
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500">
-              <th className="py-2 font-medium">User</th>
-              <th className="py-2 font-medium">Role</th>
-              <th className="py-2 font-medium">Level</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <UserRow key={u.id} user={u} isSelf={u.id === admin.id} />
-            ))}
-          </tbody>
-        </table>
+      <div>
+        <h1 className={pageTitleClass}>Users</h1>
+        <p className={mutedClass}>{users.length} accounts</p>
       </div>
+      <UserList users={users} selfId={admin.id} />
     </PageShell>
   );
 }

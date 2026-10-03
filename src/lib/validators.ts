@@ -235,3 +235,25 @@ export const updateSessionSchema = z.object({
   level: z.number().int().min(0).max(2).nullable(),
   date: z.string().refine((s) => !Number.isNaN(Date.parse(s)), "Invalid date"),
 });
+
+// ---- Forgot / reset password ----
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Enter a valid email"),
+});
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordFormSchema = z
+  .object({
+    password: z.string().min(8, "At least 8 characters").max(72, "At most 72 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+export type ResetPasswordFormInput = z.infer<typeof resetPasswordFormSchema>;
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(20).max(200),
+  password: z.string().min(8, "At least 8 characters").max(72, "At most 72 characters"),
+});

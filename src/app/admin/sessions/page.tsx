@@ -18,7 +18,7 @@ export default async function SessionsPage() {
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Sessions</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Sessions</h1>
       <NewSessionForm />
 
       <div className={cardClass}>

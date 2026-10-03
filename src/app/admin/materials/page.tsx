@@ -17,7 +17,7 @@ export default async function AdminMaterialsPage() {
 
   return (
     <PageShell user={user}>
-      <h1 className="text-2xl font-semibold">Learning materials</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Learning materials</h1>
       <NewMaterialForm />
 
       <div className={cardClass}>
