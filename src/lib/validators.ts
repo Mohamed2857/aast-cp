@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PUZZLE_XP_MIN, PUZZLE_XP_MAX } from "@/config/xp.config";
 
 export const registerSchema = z
   .object({
@@ -147,4 +148,90 @@ export const createSheetSchema = z.object({
   title: z.string().trim().min(2).max(100),
   level: z.number().int().min(0).max(2).nullable(),
   challenge: z.string().trim().max(60),
+});
+
+// ---- Daily puzzle ----
+
+const puzzleTypes = ["BUG_HUNT", "TIME_COMPLEXITY", "CODE_TRACING", "ALGORITHM_RIDDLE"] as const;
+const isoDate = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v));
+
+export const puzzleFormSchema = z
+  .object({
+    date: z.string().refine(isoDate, "Pick a date"),
+    type: z.enum(puzzleTypes),
+    title: z.string().trim().min(2, "Title is too short").max(120),
+    body: z.string().trim().min(5, "Write the puzzle").max(5000, "Too long"),
+    optionA: z.string().trim().max(200),
+    optionB: z.string().trim().max(200),
+    optionC: z.string().trim().max(200),
+    optionD: z.string().trim().max(200),
+    correct: z.enum(["0", "1", "2", "3"]),
+    explanation: z.string().max(3000, "Too long"),
+    xp: z
+      .string()
+      .regex(/^\d{1,2}$/, "Enter a number")
+      .refine(
+        (v) => Number(v) >= PUZZLE_XP_MIN && Number(v) <= PUZZLE_XP_MAX,
+        `XP must be between ${PUZZLE_XP_MIN} and ${PUZZLE_XP_MAX}`,
+      ),
+  })
+  .superRefine((d, ctx) => {
+    if (!d.optionA) ctx.addIssue({ code: "custom", path: ["optionA"], message: "Required" });
+    if (!d.optionB) ctx.addIssue({ code: "custom", path: ["optionB"], message: "Required" });
+    const opts = [d.optionA, d.optionB, d.optionC, d.optionD];
+    if (!opts[Number(d.correct)]) {
+      ctx.addIssue({ code: "custom", path: ["correct"], message: "The correct answer cannot be an empty option" });
+    }
+  });
+export type PuzzleFormInput = z.infer<typeof puzzleFormSchema>;
+
+export const createPuzzleSchema = z
+  .object({
+    date: z.string().refine(isoDate, "Invalid date"),
+    type: z.enum(puzzleTypes),
+    title: z.string().trim().min(2).max(120),
+    body: z.string().trim().min(5).max(5000),
+    options: z.array(z.string().trim().min(1).max(200)).min(2).max(4),
+    correctIndex: z.number().int().min(0).max(3),
+    explanation: z.string().max(3000).nullable(),
+    xp: z.number().int().min(PUZZLE_XP_MIN).max(PUZZLE_XP_MAX),
+  })
+  .refine((d) => d.correctIndex < d.options.length, {
+    message: "Correct answer must be one of the options",
+    path: ["correctIndex"],
+  });
+
+export const puzzleSolveSchema = z.object({
+  puzzleId: z.string().min(1).max(60),
+  choice: z.number().int().min(0).max(3),
+});
+
+// ---- Contests ----
+export const contestFormSchema = z.object({
+  url: z.string().trim().min(1, "Paste the contest link"),
+  title: z.string().trim().min(2, "Title is too short").max(100),
+  level: z.enum(["", "0", "1", "2"]), // "" = all levels
+});
+export type ContestFormInput = z.infer<typeof contestFormSchema>;
+
+export const createContestSchema = z.object({
+  url: z.string().trim().min(1).max(300),
+  title: z.string().trim().min(2).max(100),
+  level: z.number().int().min(0).max(2).nullable(),
+});
+
+// ---- Manual XP + session edit ----
+export const adjustXpSchema = z.object({
+  amount: z
+    .number()
+    .int("Amount must be a whole number")
+    .refine((v) => v !== 0, "Amount cannot be 0")
+    .refine((v) => Math.abs(v) <= 1000, "At most 1000 XP per change"),
+  reason: z.string().trim().min(3, "Write a short reason").max(200, "Reason is too long"),
+});
+
+export const updateSessionSchema = z.object({
+  title: z.string().trim().min(2).max(100),
+  level: z.number().int().min(0).max(2).nullable(),
+  date: z.string().refine((s) => !Number.isNaN(Date.parse(s)), "Invalid date"),
 });

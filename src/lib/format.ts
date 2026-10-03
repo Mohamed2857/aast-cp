@@ -30,3 +30,24 @@ export function cfRankColor(rank?: string | null) {
       return "text-slate-500";
   }
 }
+
+const cairoDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Cairo" });
+
+/** Today's calendar date in Cairo, as "YYYY-MM-DD" (the key of a DailyPuzzle). */
+export const cairoToday = () => cairoDay.format(new Date());
+
+const cairoInputParts = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Africa/Cairo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/** A date as "YYYY-MM-DDTHH:mm" in Cairo time, the format of <input type="datetime-local">. */
+export function toCairoInput(d: Date) {
+  const p = Object.fromEntries(cairoInputParts.formatToParts(d).map((x) => [x.type, x.value]));
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
+}

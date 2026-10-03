@@ -75,7 +75,12 @@ export interface CfSubmission {
   creationTimeSeconds: number;
   verdict?: string;
   problem: { index: string };
-  author: { members: { handle: string }[] };
+  author: { members: { handle: string }[]; participantType?: string };
+}
+
+export interface CfStandingRow {
+  rank: number;
+  party: { members: { handle: string }[]; participantType: string };
 }
 
 const byAscii = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
@@ -134,13 +139,14 @@ async function cfContestCall<T>(
 /** Contest name, phase and problem list (one cheap standings call). */
 export async function fetchCfContestInfo(contestId: number) {
   const r = await cfContestCall<{
-    contest: { id: number; name: string; phase: string };
+    contest: { id: number; name: string; phase: string; startTimeSeconds?: number };
     problems: CfProblem[];
   }>("contest.standings", { contestId, from: 1, count: 1, showUnofficial: true });
   return {
     id: r.contest.id,
     name: r.contest.name,
     phase: r.contest.phase,
+    startTimeSeconds: r.contest.startTimeSeconds ?? null,
     problems: r.problems.map((p) => ({ index: p.index, name: p.name })),
   };
 }
@@ -188,4 +194,26 @@ export async function fetchCfUsersBatch(handles: string[]): Promise<CfUser[]> {
     out.push(...users);
   }
   return out;
+}
+
+/** Official standings of a contest (rank + members of every row), page by page. */
+export async function fetchCfContestStandings(contestId: number) {
+  const PAGE = 500;
+  const rows: CfStandingRow[] = [];
+  let meta: { phase: string; startTimeSeconds: number | null } = { phase: "", startTimeSeconds: null };
+  for (let page = 0; page < 20; page++) {
+    const r = await cfContestCall<{
+      contest: { phase: string; startTimeSeconds?: number };
+      rows: CfStandingRow[];
+    }>("contest.standings", {
+      contestId,
+      from: 1 + page * PAGE,
+      count: PAGE,
+      showUnofficial: false,
+    });
+    meta = { phase: r.contest.phase, startTimeSeconds: r.contest.startTimeSeconds ?? null };
+    rows.push(...r.rows);
+    if (r.rows.length < PAGE) break;
+  }
+  return { ...meta, rows };
 }

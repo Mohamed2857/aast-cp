@@ -211,3 +211,30 @@ model Sheet {
 
   @@index([createdAt])
 }
+
+/// A Codeforces group contest that trainees compete in. Participation, solves,
+/// upsolves and top-3 places are turned into XP when it is synced.
+model Contest {
+  id           String    @id @default(cuid())
+  title        String
+  level        Int?
+  url          String
+  groupCode    String?
+  contestId    Int       @unique
+  problems     Json // [{ index, name }]
+  startTime    DateTime?
+  phase        String? // BEFORE, CODING, FINISHED, ...
+  lastSyncedAt DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([createdAt])
+}
+
+/// One row per failed login. Used to lock out password guessing for a while.
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  key       String // "email:<address>" or "ip:<address>"
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}

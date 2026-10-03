@@ -20,6 +20,7 @@ export default function UserRow({ user, isSelf }: { user: UserRowData; isSelf: b
   const [level, setLevel] = useState(user.level === null ? "" : String(user.level));
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [newPassword, setNewPassword] = useState<string | null>(null);
 
   const dirty = role !== user.role || level !== (user.level === null ? "" : String(user.level));
 
@@ -36,6 +37,24 @@ export default function UserRow({ user, isSelf }: { user: UserRowData; isSelf: b
     if (!res.ok) return setStatus(data.error ?? "Failed");
     setStatus("Saved");
     router.refresh();
+  }
+
+  async function resetPassword() {
+    if (
+      !window.confirm(
+        `Reset the password of ${user.name}?\n\nA new random password will be shown once. Their old password stops working.`,
+      )
+    ) {
+      return;
+    }
+    setBusy(true);
+    setStatus(null);
+    setNewPassword(null);
+    const res = await fetch(`/api/admin/users/${user.id}/password`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) return setStatus(data.error ?? "Failed");
+    setNewPassword(data.password);
   }
 
   return (
@@ -74,6 +93,20 @@ export default function UserRow({ user, isSelf }: { user: UserRowData; isSelf: b
         >
           {busy ? "..." : "Save"}
         </button>
+        <button
+          onClick={resetPassword}
+          disabled={busy}
+          className="ml-2 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 disabled:opacity-40"
+        >
+          Reset password
+        </button>
+        {newPassword && (
+          <p className="mt-1 text-xs text-slate-600">
+            New password: <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">{newPassword}</code>
+            <br />
+            <span className="text-slate-400">Shown once. Send it to the user.</span>
+          </p>
+        )}
         {status && <p className="mt-1 text-xs text-slate-500">{status}</p>}
       </td>
     </tr>

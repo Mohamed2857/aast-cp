@@ -15,12 +15,18 @@ export default function PageShell({
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-3xl items-center gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
           <Link href="/leaderboard" className={link}>
             Leaderboard
           </Link>
           <Link href="/learn" className={link}>
             Learn
+          </Link>
+          <Link href="/contests" className={link}>
+            Contests
+          </Link>
+          <Link href="/puzzle" className={link}>
+            Puzzle
           </Link>
           <Link href="/profile" className={link}>
             Profile
@@ -36,8 +42,23 @@ export default function PageShell({
             </Link>
           )}
           {isStaff && (
+            <Link href="/admin/contests" className={link}>
+              Manage contests
+            </Link>
+          )}
+          {isStaff && (
             <Link href="/admin/materials" className={link}>
               Materials
+            </Link>
+          )}
+          {isStaff && (
+            <Link href="/admin/puzzles" className={link}>
+              Puzzles
+            </Link>
+          )}
+          {isStaff && (
+            <Link href="/admin/xp" className={link}>
+              Adjust XP
             </Link>
           )}
           {user.role === "ADMIN" && (
