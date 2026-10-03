@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  TRAINEE
+  INSTRUCTOR
+  ADMIN
+}
+
+enum XpEventType {
+  SESSION_ATTENDANCE
+  CAMP_ATTENDANCE
+  SESSION_ACTIVE
+  SHEET_PROBLEM
+  SHEET_CHALLENGE
+  SHEET_COMPLETE
+  CONTEST_PARTICIPATION
+  CONTEST_SOLVE
+  CONTEST_UPSOLVE
+  CONTEST_FIRST_SOLVE
+  CONTEST_PLACE_1
+  CONTEST_PLACE_2
+  CONTEST_PLACE_3
+  DAILY_PUZZLE
+  MATERIAL_CHECKIN
+  MANUAL_ADJUSTMENT
+}
+
+enum SubmissionKind {
+  SHEET
+  CONTEST
+  UPSOLVE
+}
+
+enum SessionType {
+  SESSION
+  CAMP
+}
+
+enum PuzzleType {
+  BUG_HUNT
+  TIME_COMPLEXITY
+  CODE_TRACING
+  ALGORITHM_RIDDLE
+}
+
+model User {
+  id               String   @id @default(cuid())
+  name             String
+  email            String   @unique
+  passwordHash     String? // bcrypt hash, never sent to the client
+  role             Role     @default(TRAINEE)
+  level            Int? // 0, 1, 2
+  cfHandle         String?  @unique
+  pendingCfHandle  String? // handle being verified right now
+  cfAvatar         String?
+  cfRank           String?
+  cfRating         Int?
+  totalXp          Int      @default(0)
+  isVerified       Boolean  @default(false)
+  verifyCode       String? // temporary code, e.g. AAST-9f3k2
+  verifyCodeExpiry DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  xpTransactions    XpTransaction[]  @relation("XpOwner")
+  xpGiven           XpTransaction[]  @relation("XpCreator")
+  submissions       Submission[]
+  attendances       Attendance[]
+  puzzleSolves      PuzzleSolve[]
+  materialCompletes MaterialCompletion[]
+
+  @@index([totalXp])
+}
+
+/// Append-only ledger. User.totalXp is always the sum of this table.
+model XpTransaction {
+  id          String      @id @default(cuid())
+  userId      String
+  amount      Int // positive = award, negative = revoke
+  type        XpEventType
+  /// Identifies the "thing" that earned the XP, e.g. "attendance:<sessionId>:<userId>".
+  /// Net sum per eventKey is used to keep awards idempotent.
+  eventKey    String
+  reason      String?
+  createdById String? // instructor who triggered it (null = system)
+  createdAt   DateTime    @default(now())
+
+  user      User  @relation("XpOwner", fields: [userId], references: [id], onDelete: Cascade)
+  createdBy User? @relation("XpCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([eventKey])
+}
+
+model Submission {
+  id             String         @id @default(cuid())
+  userId         String
+  cfSubmissionId BigInt         @unique
+  contestId      Int
+  problemIndex   String
+  verdict        String
+  kind           SubmissionKind
+  createdAtCf    DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, contestId, problemIndex])
+}
+
+model Session {
+  id          String      @id @default(cuid())
+  title       String
+  type        SessionType @default(SESSION)
+  level       Int?
+  date        DateTime
+  createdAt   DateTime    @default(now())
+  attendances Attendance[]
+
+  @@index([date])
+}
+
+model Attendance {
+  id        String  @id @default(cuid())
+  sessionId String
+  userId    String
+  present   Boolean @default(false)
+  active    Boolean @default(false) // "active on sessions" bonus
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+}
+
+model DailyPuzzle {
+  id           String     @id @default(cuid())
+  /// Cairo calendar date, format "YYYY-MM-DD"
+  date         String     @unique
+  type         PuzzleType
+  title        String
+  body         String // may contain code
+  options      Json // string[]
+  correctIndex Int
+  explanation  String?
+  xp           Int        @default(10) // 10 to 20
+  solves       PuzzleSolve[]
+}
+
+model PuzzleSolve {
+  id        String   @id @default(cuid())
+  puzzleId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  puzzle DailyPuzzle @relation(fields: [puzzleId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([puzzleId, userId])
+}
+
+model Material {
+  id                String   @id @default(cuid())
+  level             Int // 0, 1, 2
+  week              Int
+  title             String
+  slidesUrl         String?
+  recordingUrl      String?
+  tips              String? // Tips & Tricks (markdown)
+  checkQuestion     String
+  checkOptions      Json // string[]
+  checkCorrectIndex Int
+  createdAt         DateTime @default(now())
+
+  completions MaterialCompletion[]
+
+  @@unique([level, week, title])
+}
+
+model MaterialCompletion {
+  id         String   @id @default(cuid())
+  materialId String
+  userId     String
+  createdAt  DateTime @default(now())
+
+  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([materialId, userId])
+}
