@@ -29,8 +29,8 @@ export const XP_VALUES: Record<XpEventType, number> = {
   // Daily puzzle: actual value comes from DailyPuzzle.xp (10 to 20)
   DAILY_PUZZLE: 10,
 
-  // Learning hub: not defined in the plan yet; set a value to enable
-  MATERIAL_CHECKIN: 0,
+  // Learning hub: XP for answering a material's check-in question correctly (once per material)
+  MATERIAL_CHECKIN: 20,
 
   // Instructor manual changes always pass an explicit amount
   MANUAL_ADJUSTMENT: 0,

@@ -19,12 +19,25 @@ export default function PageShell({
           <Link href="/leaderboard" className={link}>
             Leaderboard
           </Link>
+          <Link href="/learn" className={link}>
+            Learn
+          </Link>
           <Link href="/profile" className={link}>
             Profile
           </Link>
           {isStaff && (
             <Link href="/admin/sessions" className={link}>
               Sessions
+            </Link>
+          )}
+          {isStaff && (
+            <Link href="/admin/sheets" className={link}>
+              Sheets
+            </Link>
+          )}
+          {isStaff && (
+            <Link href="/admin/materials" className={link}>
+              Materials
             </Link>
           )}
           {user.role === "ADMIN" && (

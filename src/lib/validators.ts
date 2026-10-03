@@ -60,3 +60,91 @@ export const updateUserSchema = z.object({
   role: z.enum(["TRAINEE", "INSTRUCTOR", "ADMIN"]).optional(),
   level: z.number().int().min(0).max(2).nullable().optional(),
 });
+
+// ---- Learning hub ----
+const isHttpUrl = (v: string) => {
+  try {
+    const u = new URL(v);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+/** Form side: empty string means "no link". Only http(s) is allowed (blocks javascript: links). */
+const optionalUrlField = z
+  .string()
+  .trim()
+  .refine((v) => v === "" || isHttpUrl(v), "Must be a full http:// or https:// link");
+
+export const materialFormSchema = z
+  .object({
+    title: z.string().trim().min(2, "Title is too short").max(120),
+    level: z.enum(["0", "1", "2"]),
+    week: z
+      .string()
+      .regex(/^\d{1,2}$/, "Week must be a number")
+      .refine((v) => Number(v) >= 1, "Week starts at 1"),
+    slidesUrl: optionalUrlField,
+    recordingUrl: optionalUrlField,
+    tips: z.string().max(10_000, "Tips are too long"),
+    checkQuestion: z.string().trim().min(5, "Write the check-in question").max(500),
+    optionA: z.string().trim().max(200),
+    optionB: z.string().trim().max(200),
+    optionC: z.string().trim().max(200),
+    optionD: z.string().trim().max(200),
+    correct: z.enum(["0", "1", "2", "3"]),
+  })
+  .superRefine((d, ctx) => {
+    if (!d.optionA) ctx.addIssue({ code: "custom", path: ["optionA"], message: "Required" });
+    if (!d.optionB) ctx.addIssue({ code: "custom", path: ["optionB"], message: "Required" });
+    const opts = [d.optionA, d.optionB, d.optionC, d.optionD];
+    if (!opts[Number(d.correct)]) {
+      ctx.addIssue({ code: "custom", path: ["correct"], message: "The correct answer cannot be an empty option" });
+    }
+  });
+export type MaterialFormInput = z.infer<typeof materialFormSchema>;
+
+const serverUrl = z
+  .string()
+  .trim()
+  .max(500)
+  .refine(isHttpUrl, "Invalid link")
+  .nullable();
+
+export const createMaterialSchema = z
+  .object({
+    title: z.string().trim().min(2).max(120),
+    level: z.number().int().min(0).max(2),
+    week: z.number().int().min(1).max(52),
+    slidesUrl: serverUrl,
+    recordingUrl: serverUrl,
+    tips: z.string().max(10_000).nullable(),
+    checkQuestion: z.string().trim().min(5).max(500),
+    checkOptions: z.array(z.string().trim().min(1).max(200)).min(2).max(4),
+    checkCorrectIndex: z.number().int().min(0).max(3),
+  })
+  .refine((d) => d.checkCorrectIndex < d.checkOptions.length, {
+    message: "Correct answer must be one of the options",
+    path: ["checkCorrectIndex"],
+  });
+
+export const checkinSchema = z.object({
+  choice: z.number().int().min(0).max(3),
+});
+
+// ---- Sheets ----
+export const sheetFormSchema = z.object({
+  url: z.string().trim().min(1, "Paste the contest link"),
+  title: z.string().trim().min(2, "Title is too short").max(100),
+  level: z.enum(["", "0", "1", "2"]), // "" = all levels
+  challenge: z.string().trim().max(60), // e.g. "E, F"
+});
+export type SheetFormInput = z.infer<typeof sheetFormSchema>;
+
+export const createSheetSchema = z.object({
+  url: z.string().trim().min(1).max(300),
+  title: z.string().trim().min(2).max(100),
+  level: z.number().int().min(0).max(2).nullable(),
+  challenge: z.string().trim().max(60),
+});
