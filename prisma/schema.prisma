@@ -201,10 +201,13 @@ model Sheet {
   id               String    @id @default(cuid())
   title            String
   level            Int?
+  url              String
   groupCode        String?
   contestId        Int       @unique
   problems         Json // [{ index, name }]
-  challengeIndexes String[] // problem indexes worth SHEET_CHALLENGE XP, e.g. ["E","F"]
+  challengeIndices String[] // problem indexes worth SHEET_CHALLENGE XP, e.g. ["E","F"]
   lastSyncedAt     DateTime?
   createdAt        DateTime  @default(now())
+
+  @@index([createdAt])
 }

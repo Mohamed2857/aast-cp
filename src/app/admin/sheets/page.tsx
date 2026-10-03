@@ -30,7 +30,7 @@ export default async function AdminSheetsPage() {
                   <p className="text-xs text-slate-500">
                     {s.level === null ? "All levels" : `Level ${s.level}`} · contest {s.contestId} ·{" "}
                     {parseProblems(s.problems).length} problems
-                    {s.challengeIndexes.length > 0 && ` (challenge: ${s.challengeIndexes.join(", ")})`}
+                    {s.challengeIndices.length > 0 && ` (challenge: ${s.challengeIndices.join(", ")})`}
                   </p>
                   <p className="text-xs text-slate-400">
                     {s.lastSyncedAt ? `Last sync: ${formatCairo(s.lastSyncedAt)}` : "Never synced"}

@@ -45,7 +45,7 @@ export async function syncSheet(sheetId: string): Promise<SyncSummary> {
   if (!sheet) throw new Error("Sheet not found");
   const problems = parseProblems(sheet.problems);
   const known = new Set(problems.map((p) => p.index));
-  const challenge = new Set(sheet.challengeIndexes);
+  const challenge = new Set(sheet.challengeIndices);
 
   const trainees = await prisma.user.findMany({
     where: { role: "TRAINEE", isVerified: true, cfHandle: { not: null } },

@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     return cfErrorResponse(e);
   }
 
-  const challengeIndexes = [
+  const challengeIndices = [
     ...new Set(
       challenge
         .split(/[\s,;]+/)
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     ),
   ];
   const valid = new Set(info.problems.map((p) => p.index.toUpperCase()));
-  const unknown = challengeIndexes.filter((i) => !valid.has(i));
+  const unknown = challengeIndices.filter((i) => !valid.has(i));
   if (unknown.length > 0) {
     return NextResponse.json(
       {
@@ -58,17 +58,18 @@ export async function POST(req: Request) {
   // keep the exact index spelling used by Codeforces (e.g. "A1")
   const exact = info.problems
     .map((p) => p.index)
-    .filter((i) => challengeIndexes.includes(i.toUpperCase()));
+    .filter((i) => challengeIndices.includes(i.toUpperCase()));
 
   try {
     const sheet = await prisma.sheet.create({
       data: {
         title,
         level,
+        url,
         groupCode: link.groupCode,
         contestId: link.contestId,
         problems: info.problems,
-        challengeIndexes: exact,
+        challengeIndices: exact,
       },
       select: { id: true },
     });
