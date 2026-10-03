@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePageUser, STAFF } from "@/lib/guards";
 import PageShell from "@/components/PageShell";
 import NewMaterialForm from "@/components/NewMaterialForm";
+import DeleteMaterialButton from "@/components/DeleteMaterialButton";
 import { cardClass } from "@/components/ui";
 
 export default async function AdminMaterialsPage() {
@@ -26,19 +27,22 @@ export default async function AdminMaterialsPage() {
         ) : (
           <ul className="divide-y divide-slate-100">
             {materials.map((m) => (
-              <li key={m.id}>
-                <Link
-                  href={`/learn/${m.id}`}
-                  className="flex items-center justify-between py-3 hover:bg-slate-50"
-                >
-                  <div>
-                    <p className="font-medium">{m.title}</p>
-                    <p className="text-xs text-slate-500">
-                      Level {m.level} · Week {m.week}
-                    </p>
-                  </div>
-                  <span className="text-sm text-slate-600">{m._count.completions} completed</span>
+              <li key={m.id} className="flex items-center justify-between gap-3 py-3">
+                <Link href={`/learn/${m.id}`} className="min-w-0 flex-1 hover:underline">
+                  <p className="truncate font-medium">{m.title}</p>
+                  <p className="text-xs text-slate-500">
+                    Level {m.level} · Week {m.week} · {m._count.completions} completed
+                  </p>
                 </Link>
+                <div className="flex items-start gap-2">
+                  <Link
+                    href={`/admin/materials/${m.id}/edit`}
+                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50"
+                  >
+                    Edit
+                  </Link>
+                  {user.role === "ADMIN" && <DeleteMaterialButton materialId={m.id} title={m.title} />}
+                </div>
               </li>
             ))}
           </ul>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { syncSheet } from "@/lib/sheets";
+import { refreshCfProfiles } from "@/lib/cf-profiles";
 
 export const maxDuration = 60;
 
@@ -23,5 +24,11 @@ export async function GET(req: Request) {
       results[s.title] = { error: e instanceof Error ? e.message : "failed" };
     }
   }
-  return NextResponse.json({ sheets: sheets.length, results });
+  let profiles: unknown;
+  try {
+    profiles = await refreshCfProfiles();
+  } catch (e) {
+    profiles = { error: e instanceof Error ? e.message : "failed" };
+  }
+  return NextResponse.json({ sheets: sheets.length, results, profiles });
 }

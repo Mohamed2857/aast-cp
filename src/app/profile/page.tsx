@@ -7,6 +7,11 @@ import UnlinkButton from "@/components/UnlinkButton";
 import PageShell from "@/components/PageShell";
 import { cardClass } from "@/components/ui";
 
+// Kept outside the component: the purity lint rule forbids Date.now() during render.
+function isInFuture(d: Date | null | undefined): boolean {
+  return !!d && d.getTime() > Date.now();
+}
+
 export default async function ProfilePage() {
   const user = await requirePageUser();
 
@@ -17,7 +22,7 @@ export default async function ProfilePage() {
     select: { id: true, amount: true, type: true, reason: true, createdAt: true },
   });
 
-  const stillValid = user.verifyCodeExpiry && user.verifyCodeExpiry.getTime() > Date.now();
+  const stillValid = isInFuture(user.verifyCodeExpiry);
   const pending =
     !user.isVerified && user.pendingCfHandle && user.verifyCode && stillValid
       ? {

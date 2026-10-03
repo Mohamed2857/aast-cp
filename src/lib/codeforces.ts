@@ -114,9 +114,26 @@ export async function cfAuthCall<T>(
   });
 }
 
+/**
+ * Private group contests are only visible to group members, and some calls need
+ * asManager=true. We try as manager first, then fall back to a plain call
+ * (asManager is rejected when the key's account is not a manager of the group).
+ */
+async function cfContestCall<T>(
+  method: string,
+  params: Record<string, string | number | boolean>,
+): Promise<T> {
+  try {
+    return await cfAuthCall<T>(method, { ...params, asManager: true });
+  } catch (e) {
+    if (e instanceof CfConfigError) throw e;
+    return cfAuthCall<T>(method, params);
+  }
+}
+
 /** Contest name, phase and problem list (one cheap standings call). */
 export async function fetchCfContestInfo(contestId: number) {
-  const r = await cfAuthCall<{
+  const r = await cfContestCall<{
     contest: { id: number; name: string; phase: string };
     problems: CfProblem[];
   }>("contest.standings", { contestId, from: 1, count: 1, showUnofficial: true });
@@ -133,7 +150,7 @@ export async function fetchCfContestSubmissions(contestId: number): Promise<CfSu
   const PAGE = 1000;
   const out: CfSubmission[] = [];
   for (let page = 0; page < 50; page++) {
-    const batch = await cfAuthCall<CfSubmission[]>("contest.status", {
+    const batch = await cfContestCall<CfSubmission[]>("contest.status", {
       contestId,
       from: 1 + page * PAGE,
       count: PAGE,
@@ -151,4 +168,24 @@ export async function fetchCfGroupContests(groupCode: string) {
     gym: false,
   });
   return list.slice(0, 30).map((c) => ({ id: c.id, name: c.name, phase: c.phase }));
+}
+
+/**
+ * Fetches rank, rating and avatar for many handles (one call per chunk).
+ * A chunk that fails (for example one renamed handle) is skipped, not fatal.
+ */
+export async function fetchCfUsersBatch(handles: string[]): Promise<CfUser[]> {
+  const CHUNK = 100;
+  const out: CfUser[] = [];
+  for (let i = 0; i < handles.length; i += CHUNK) {
+    const chunk = handles.slice(i, i + CHUNK);
+    const url = `${CF_API}/user.info?handles=${encodeURIComponent(chunk.join(";"))}`;
+    const users = await enqueue(async () => {
+      const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(15_000) });
+      const data = await res.json().catch(() => null);
+      return data?.status === "OK" && Array.isArray(data.result) ? (data.result as CfUser[]) : [];
+    });
+    out.push(...users);
+  }
+  return out;
 }
